@@ -390,7 +390,6 @@ export default {
 
 .news-date .icon {
   font-size: 0.9rem;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .news-title {
