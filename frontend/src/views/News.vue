@@ -2,7 +2,7 @@
   <div class="news-page">
     <div class="page-header">
       <div class="container">
-        <h1>📰 News & Updates</h1>
+        <h1><span class="emoji">📰</span> News & Updates</h1>
         <p class="subtitle">Stay updated with the latest cinema news</p>
       </div>
     </div>
@@ -229,6 +229,15 @@ export default {
   background-clip: text;
 }
 
+.page-header h1 .emoji {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
 .page-header .subtitle {
   color: #d5d5d5;
   font-size: 1.2rem;
@@ -381,6 +390,7 @@ export default {
 
 .news-date .icon {
   font-size: 0.9rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .news-title {
