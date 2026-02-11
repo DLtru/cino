@@ -5,7 +5,7 @@
       <div class="hero-overlay">
         <div class="container">
           <div class="hero-content">
-            <h1 class="hero-title">🎬 Welcome to Cinema</h1>
+            <h1 class="hero-title">🎥 Welcome to Cinema</h1>
             <p class="hero-subtitle">Experience the Magic of Movies</p>
             <p class="hero-description">Discover the latest blockbusters, timeless classics, and everything in between</p>
           </div>
@@ -19,7 +19,7 @@
         <div class="cinema-selector-wrapper">
           <div class="custom-dropdown" :class="{ open: cinemaDropdownOpen }">
             <button class="dropdown-btn" @click="toggleCinemaDropdown">
-              <span class="dropdown-icon">🎬</span>
+              <span class="dropdown-icon">🎥</span>
               <span>{{ selectedCinemaName || 'All Cinemas' }}</span>
               <span class="arrow">▼</span>
             </button>
@@ -98,7 +98,7 @@
                 </span>
               </div>
               <div class="meta">
-                <span class="duration">🕐 {{ movie.duration || 'N/A' }} min</span>
+                <span class="duration">⏱️ {{ movie.duration || 'N/A' }} min</span>
                 <span class="age-badge" :class="getAgeRatingClass(movie.ageRating)">
                   {{ movie.ageRating || 'NR' }}
                 </span>

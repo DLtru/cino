@@ -2,7 +2,7 @@
   <div class="movies-page">
     <div class="page-header">
       <div class="container">
-        <h1>🎬 All Movies</h1>
+        <h1>🎥 All Movies</h1>
         <p class="subtitle">Discover our complete collection of films</p>
       </div>
     </div>
@@ -17,7 +17,7 @@
             <input 
               v-model="searchQuery" 
               type="text" 
-              placeholder="🔍 Search by title..."
+              placeholder="🔎 Search by title..."
               class="search-input-inline"
             />
           </div>
@@ -129,7 +129,7 @@
       </div>
 
       <div v-else-if="filteredMovies.length === 0" class="no-results">
-        <span class="no-results-icon">🎬</span>
+        <span class="no-results-icon">🎥</span>
         <p>No movies found matching your search criteria</p>
       </div>
 
@@ -179,7 +179,7 @@
             </div>
             <div class="meta">
               <span class="duration">
-                <span class="icon">🕐</span>
+                <span class="icon">⏱️</span>
                 {{ movie.duration || 'N/A' }} min
               </span>
               <span class="age-rating" :class="getAgeRatingClass(movie.ageRating)">
