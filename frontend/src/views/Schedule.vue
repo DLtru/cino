@@ -5,7 +5,7 @@
       <div class="hero-overlay">
         <div class="container">
           <div class="hero-content">
-            <h1 class="hero-title">🎞️ Movie Schedule</h1>
+            <h1 class="hero-title"><span class="emoji">🎞️</span> Movie Schedule</h1>
             <p class="hero-subtitle">Find Your Perfect Showtime</p>
             <p class="hero-description">Browse available sessions and book your tickets for the best cinema experience</p>
           </div>
@@ -597,6 +597,15 @@ export default {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.hero-title .emoji {
+  background: none;
+  -webkit-background-clip: initial;
+  background-clip: initial;
+  -webkit-text-fill-color: #fff;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .hero-subtitle {
