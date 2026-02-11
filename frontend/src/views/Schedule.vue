@@ -20,7 +20,7 @@
         <div class="filter-section">
           <div class="custom-dropdown" :class="{ open: cinemaDropdownOpen }">
             <button class="dropdown-btn" @click="toggleCinemaDropdown">
-              <span class="dropdown-icon">🎬</span>
+              <span class="dropdown-icon">🎥</span>
               <span>Cinema</span>
               <span class="arrow">▼</span>
             </button>
