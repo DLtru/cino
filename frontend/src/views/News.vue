@@ -235,7 +235,7 @@ export default {
   background-clip: initial;
   -webkit-text-fill-color: #fff;
   color: #fff;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .page-header .subtitle {
