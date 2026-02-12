@@ -7,6 +7,8 @@ A Vue 3 frontend application for a cinema booking system, inspired by Apollo Kin
 - **Home Page** - Hero section with featured movies
 - **Movies Page** - Browse all movies with filtering and sorting options
 - **Movie Detail Page** - Detailed movie information with showtimes
+- **Schedule Page** - Daily schedule overview
+- **News Page** - Apollo Kino news feed
 - **Booking Page** - Multi-step booking process (movie selection, seat selection, payment)
 - **Admin Dashboard** - Manage movies, sessions, bookings, and cinemas
 
@@ -39,6 +41,10 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:5173`
+
+### Backend Connection
+
+The frontend reads `VITE_API_URL` (default: `http://localhost:3000`) to connect to the backend API.
 
 ### Production Build
 
@@ -88,6 +94,8 @@ frontend/
 - `/` - Home page
 - `/movies` - All movies listing
 - `/movies/:id` - Movie detail page
+- `/schedule` - Daily schedule
+- `/news` - News feed
 - `/booking` - Ticket booking
 - `/admin` - Admin dashboard
 
@@ -102,9 +110,7 @@ The frontend design is inspired by Apollo Kino (apollokino.ee) with:
 
 ## Future Enhancements
 
-- Connect to backend API
-- User authentication
-- Real movie data integration
+- User authentication and protected admin access
 - Payment gateway integration
 - Responsive mobile design improvements
 - Movie search functionality
