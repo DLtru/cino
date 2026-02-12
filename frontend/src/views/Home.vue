@@ -5,7 +5,7 @@
       <div class="hero-overlay">
         <div class="container">
           <div class="hero-content">
-            <h1 class="hero-title">🎥 Welcome to Cinema</h1>
+            <h1 class="hero-title">🎬 Welcome to Cinema</h1>
             <p class="hero-subtitle">Experience the Magic of Movies</p>
             <p class="hero-description">Discover the latest blockbusters, timeless classics, and everything in between</p>
           </div>
@@ -19,7 +19,7 @@
         <div class="cinema-selector-wrapper">
           <div class="custom-dropdown" :class="{ open: cinemaDropdownOpen }">
             <button class="dropdown-btn" @click="toggleCinemaDropdown">
-              <span class="dropdown-icon">🎥</span>
+              <span class="dropdown-icon">🎬</span>
               <span>{{ selectedCinemaName || 'All Cinemas' }}</span>
               <span class="arrow">▼</span>
             </button>
@@ -33,10 +33,10 @@
               </div>
               <div 
                 v-for="cinema in cinemas" 
-                :key="cinema._id" 
+                :key="cinema.id" 
                 class="dropdown-item"
-                :class="{ active: selectedCinema === cinema._id }"
-                @click="selectCinema(cinema._id, cinema.name)"
+                :class="{ active: selectedCinema === cinema.id }"
+                @click="selectCinema(cinema.id, cinema.name)"
               >
                 {{ cinema.name }}
               </div>
@@ -98,7 +98,7 @@
                 </span>
               </div>
               <div class="meta">
-                <span class="duration">⏱️ {{ movie.duration || 'N/A' }} min</span>
+                <span class="duration">🕐 {{ movie.duration || 'N/A' }} min</span>
                 <span class="age-badge" :class="getAgeRatingClass(movie.ageRating)">
                   {{ movie.ageRating || 'NR' }}
                 </span>
@@ -169,36 +169,22 @@ export default {
     async fetchCinemas() {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        
-        const [localCinemasResponse, theatreAreasResponse] = await Promise.all([
-          fetch(`${apiUrl}/api/cinemas`).catch(() => null),
-          fetch(`${apiUrl}/api/apollo-kino/TheatreAreas`).catch(() => null)
-        ]);
-        
-        let allCinemas = [];
-        
-        if (localCinemasResponse && localCinemasResponse.ok) {
-          const data = await localCinemasResponse.json();
-          if (data.success && data.data) {
-            allCinemas = data.data.map(cinema => ({
-              _id: cinema._id,
-              name: cinema.name
-            }));
-          }
+        const response = await fetch(`${apiUrl}/api/cinemas`);
+        const data = await response.json();
+        if (data.success && data.data) {
+          this.cinemas = data.data
+            .map(cinema => {
+              const cinemaId = cinema.id ?? cinema.ID ?? cinema.apolloId;
+              if (!cinemaId) return null;
+              return {
+                id: String(cinemaId),
+                name: cinema.Name ?? cinema.name ?? cinema.TheatreName ?? 'Unknown Cinema'
+              };
+            })
+            .filter(Boolean);
+        } else {
+          this.cinemas = [];
         }
-        
-        if (theatreAreasResponse && theatreAreasResponse.ok) {
-          const data = await theatreAreasResponse.json();
-          if (data.success && data.data) {
-            const theatreAreas = data.data.map(area => ({
-              _id: area.ID,
-              name: area.Name
-            }));
-            allCinemas = [...allCinemas, ...theatreAreas];
-          }
-        }
-        
-        this.cinemas = allCinemas;
       } catch (err) {
         console.error('Error fetching cinemas:', err);
       }

@@ -5,7 +5,7 @@
       <div class="hero-overlay">
         <div class="container">
           <div class="hero-content">
-            <h1 class="hero-title"><span class="emoji">🎞️</span> Movie Schedule</h1>
+            <h1 class="hero-title">🎞️ Movie Schedule</h1>
             <p class="hero-subtitle">Find Your Perfect Showtime</p>
             <p class="hero-description">Browse available sessions and book your tickets for the best cinema experience</p>
           </div>
@@ -20,7 +20,7 @@
         <div class="filter-section">
           <div class="custom-dropdown" :class="{ open: cinemaDropdownOpen }">
             <button class="dropdown-btn" @click="toggleCinemaDropdown">
-              <span class="dropdown-icon">🎥</span>
+              <span class="dropdown-icon">🎬</span>
               <span>Cinema</span>
               <span class="arrow">▼</span>
             </button>
@@ -34,10 +34,10 @@
               </div>
               <div 
                 v-for="cinema in cinemas" 
-                :key="cinema._id" 
+                :key="cinema.id" 
                 class="dropdown-item"
-                :class="{ active: selectedCinema === cinema._id }"
-                @click="selectCinema(cinema._id)"
+                :class="{ active: selectedCinema === cinema.id }"
+                @click="selectCinema(cinema.id)"
               >
                 {{ cinema.name }}
               </div>
@@ -357,41 +357,22 @@ export default {
     async fetchCinemas() {
       try {
         const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        
-        // Fetch both local cinemas and Apollo Kino theatre areas
-        const [localCinemasResponse, theatreAreasResponse] = await Promise.all([
-          fetch(`${apiUrl}/api/cinemas`).catch(() => null),
-          fetch(`${apiUrl}/api/apollo-kino/TheatreAreas`).catch(() => null)
-        ]);
-        
-        let allCinemas = [];
-        
-        // Process local cinemas
-        if (localCinemasResponse && localCinemasResponse.ok) {
-          const data = await localCinemasResponse.json();
-          if (data.success && data.data) {
-            allCinemas = data.data.map(cinema => ({
-              _id: cinema._id,
-              name: cinema.name
-            }));
-          }
+        const response = await fetch(`${apiUrl}/api/cinemas`);
+        const data = await response.json();
+        if (data.success && data.data) {
+          this.cinemas = data.data
+            .map(cinema => {
+              const cinemaId = cinema.id ?? cinema.ID ?? cinema.apolloId;
+              if (!cinemaId) return null;
+              return {
+                id: String(cinemaId),
+                name: cinema.Name ?? cinema.name ?? cinema.TheatreName ?? 'Unknown Cinema'
+              };
+            })
+            .filter(Boolean);
+        } else {
+          this.cinemas = [];
         }
-        
-        // Process Apollo Kino theatre areas
-        // Note: Apollo Kino API returns ID/Name fields vs local cinemas' _id/name
-        if (theatreAreasResponse && theatreAreasResponse.ok) {
-          const data = await theatreAreasResponse.json();
-          if (data.success && data.data) {
-            const theatreAreas = data.data.map(area => ({
-              _id: area.ID,
-              name: area.Name
-            }));
-            // Add theatre areas to cinemas list
-            allCinemas = [...allCinemas, ...theatreAreas];
-          }
-        }
-        
-        this.cinemas = allCinemas;
       } catch (err) {
         console.error('Error fetching cinemas:', err);
       }
@@ -458,13 +439,14 @@ export default {
                 || show.EventSmallImagePortrait
                 || 'https://via.placeholder.com/200x300/1a1a2e/e94560?text=' + encodeURIComponent(show.Title || 'No Image');
               
+              const cinemaId = show.TheatreID != null ? String(show.TheatreID) : '';
               return {
                 id: show.ID || index,
                 movieTitle: show.Title || 'Unknown',
                 genre: show.Genres || '',
                 time: `${hours}:${minutes}`,
                 cinema: show.TheatreName || show.Theatre || 'Unknown Cinema',
-                cinemaId: show.TheatreID || '',
+                cinemaId,
                 hall: show.TheatreAuditorium || 'Unknown Hall',
                 posterUrl: posterUrl,
                 language: spokenLang,
@@ -534,6 +516,8 @@ export default {
           film: session.movieTitle,
           cinema: session.cinema,
           cinemaId: session.cinemaId,
+          hall: session.hall,
+          posterUrl: session.posterUrl,
           date: session.date,
           time: session.time
         }
@@ -597,15 +581,6 @@ export default {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-.hero-title .emoji {
-  background: none;
-  -webkit-background-clip: initial;
-  background-clip: initial;
-  -webkit-text-fill-color: #fff;
-  color: #fff;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .hero-subtitle {
