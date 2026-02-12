@@ -1,10 +1,12 @@
-# TA23B-B5 Project
+# Cino – Cinema Booking Platform
 
-A full-stack Cinema Project, built with Node.js, Express.js, MongoDB, and Vue.js.
+A full-stack cinema booking project built with Node.js, Express.js, MongoDB, and Vue.js. The backend syncs Apollo Kino data, and the frontend consumes the REST API for browsing films, schedules, and bookings.
 
 ## Table of Contents
+- [Project Overview](#project-overview)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
+- [Environment Variables](#environment-variables)
 - [Running the Project](#running-the-project)
 - [Frontend](#frontend)
 - [Backend](#backend)
@@ -13,6 +15,13 @@ A full-stack Cinema Project, built with Node.js, Express.js, MongoDB, and Vue.js
 - [Available Scripts](#available-scripts)
 - [API Endpoints](#api-endpoints)
 - [Technologies Used](#technologies-used)
+
+## Project Overview
+
+- Public catalogue of films, sessions, news, and schedules
+- Booking flow with seat selection and booking number lookup
+- Admin dashboard for managing sessions and bookings (no authentication yet)
+- Apollo Kino XML API integration for data sync
 
 ## Prerequisites
 
@@ -41,8 +50,8 @@ mongosh --eval "db.version()"
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Tallinna-Polütehnikum/TA23B-B5-projekt.git
-cd TA23B-B5-projekt
+git clone https://github.com/DLtru/cino.git
+cd cino
 ```
 
 2. Install backend dependencies:
@@ -50,11 +59,7 @@ cd TA23B-B5-projekt
 npm install
 ```
 
-This will install all required packages listed in `package.json`:
-- `express` - Web framework
-- `cors` - Cross-Origin Resource Sharing middleware
-- `mongoose` - MongoDB object modeling
-- `nodemon` - Auto-restart server during development
+This will install all required packages listed in `package.json`.
 
 ### Frontend Installation
 
@@ -65,6 +70,25 @@ npm install
 ```
 
 This will install Vue 3, Vue Router, and Vite.
+
+## Environment Variables
+
+Create a `.env` file in the repository root for the backend:
+
+```bash
+MONGODB_URI=mongodb://localhost:27017/cinema
+PORT=3000
+APOLLO_KINO_API_URL=https://www.apollokino.ee/xml
+```
+
+- `MONGODB_URI` is required. The server exits if it is not set.
+- `PORT` and `APOLLO_KINO_API_URL` are optional.
+
+For the frontend, create `frontend/.env` (or `.env.local`) if you need a custom API base URL:
+
+```bash
+VITE_API_URL=http://localhost:3000
+```
 
 ## Running the Project
 
@@ -116,17 +140,23 @@ The built files will be in the `frontend/dist` directory.
 
 ## Frontend
 
-The frontend is a Vue 3 application with the following features:
+The frontend is a Vue 3 application with the following views:
 
-- **Home Page** (`/`) - Hero section with featured movies
+- **Home Page** (`/`) - Hero section with featured content
 - **Movies Page** (`/movies`) - Browse all movies with filtering options
 - **Movie Detail Page** (`/movies/:id`) - Detailed movie information with showtimes
+- **Schedule Page** (`/schedule`) - Daily schedule overview
+- **News Page** (`/news`) - Apollo Kino news feed
 - **Booking Page** (`/booking`) - Multi-step booking process
 - **Admin Dashboard** (`/admin`) - Manage movies, sessions, bookings, and cinemas
+
+The frontend reads `VITE_API_URL` to connect to the backend (defaults to `http://localhost:3000`).
 
 For more details, see [frontend/README.md](frontend/README.md).
 
 ## Backend
+
+The backend is an Express.js API that connects to MongoDB, syncs data from the Apollo Kino XML API, and serves booking and admin workflows. Admin endpoints are currently unauthenticated, so treat them as trusted/internal routes.
 
 ## Database Schema
 
@@ -145,15 +175,18 @@ For detailed information about the database schema, including field descriptions
 ## Project Structure
 
 ```
-TA23B-B5-projekt/
+cino/
 ├── frontend/               # Vue.js frontend application
 │   ├── src/
 │   │   ├── components/    # Reusable Vue components
 │   │   │   └── layout/    # Layout components (Header, Footer)
 │   │   ├── views/         # Page components
+│   │   │   ├── Booking.vue
+│   │   │   ├── Home.vue
 │   │   │   ├── Movies.vue
 │   │   │   ├── MovieDetail.vue
-│   │   │   ├── Booking.vue
+│   │   │   ├── News.vue
+│   │   │   ├── Schedule.vue
 │   │   │   └── Admin.vue
 │   │   ├── router/        # Vue Router configuration
 │   │   ├── App.vue        # Root component
@@ -163,7 +196,7 @@ TA23B-B5-projekt/
 │   ├── vite.config.js     # Vite configuration
 │   └── package.json       # Frontend dependencies
 ├── backend/
-│   ├── models/            # Database models (Mongoose schemas)
+│   ├── Models/            # Database models (Mongoose schemas)
 │   │   ├── User.js        # User model
 │   │   ├── Cinema.js      # Cinema model
 │   │   ├── Hall.js        # Hall model
@@ -172,10 +205,12 @@ TA23B-B5-projekt/
 │   │   ├── Seat.js        # Seat model
 │   │   ├── Booking.js     # Booking model
 │   │   └── index.js       # Models export file
+│   ├── services/          # External API integrations
 │   └── index.js           # Main server file with Express configuration
 ├── node_modules/          # Backend dependencies (not tracked in git)
 ├── .gitignore             # Git ignore rules
 ├── DATABASE_SCHEMA.md     # Database schema documentation
+├── docs/                  # Additional documentation
 ├── package.json           # Backend metadata and dependencies
 ├── package-lock.json  # Locked versions of dependencies
 └── README.md          # This file
@@ -187,6 +222,8 @@ TA23B-B5-projekt/
 
 - `npm start` - Starts the backend server in production mode
 - `npm run dev` - Starts the backend server in development mode with nodemon
+- `npm run seed` - Seed the database with initial data
+- `npm run add-sessions` - Add sessions to the database
 - `npm test` - Placeholder for tests (not yet implemented)
 
 ### Frontend Scripts
@@ -197,19 +234,55 @@ TA23B-B5-projekt/
 
 ## API Endpoints
 
-### GET /
+Base URL: `http://localhost:3000`
 
-Returns a hardcoded string value.
+### Core
 
-**Example:**
-```bash
-curl http://localhost:3000/
-```
+- `GET /` - Health check (returns `"abbik"`)
 
-**Response:**
-```json
-"abbik"
-```
+### Films
+
+- `GET /api/films` (filters: `genre`, `ageRating`, `limit`)
+- `GET /api/films/:id`
+- `GET /api/films/:id/sessions`
+
+### Sessions
+
+- `GET /api/sessions` (filters: `filmId`, `date`, `hallId`)
+- `GET /api/sessions/:id/seats`
+
+### Cinemas
+
+Rate limited to 60 requests per minute.
+
+- `GET /api/cinemas`
+- `GET /api/cinemas/:id/halls`
+
+### Apollo Kino Integration
+
+- `GET /api/apollo-kino/sync` (query: `dtFrom`, `dtTo`)
+- `GET /api/apollo-kino/raw`
+- `GET /api/apollo-kino/events`
+- `GET /api/apollo-kino/schedule` (query: `dtFrom`, `dtTo`)
+- `GET /api/apollo-kino/TheatreAreas`
+- `GET /api/apollo-kino/NewsCategories`
+- `GET /api/apollo-kino/News`
+
+### Bookings
+
+- `POST /api/bookings` (body: `sessionId`, `seats`, `contactEmail`, `contactPhone`, `paymentMethod`)
+- `GET /api/bookings/:bookingNumber`
+
+### Admin (no authentication yet)
+
+- `GET /api/admin/sessions`
+- `GET /api/admin/sessions/:id`
+- `POST /api/admin/sessions`
+- `PUT /api/admin/sessions/:id`
+- `DELETE /api/admin/sessions/:id`
+- `GET /api/admin/halls`
+- `GET /api/admin/bookings`
+- `DELETE /api/admin/bookings/:id`
 
 ## Technologies Used
 
@@ -233,4 +306,4 @@ ISC
 
 ## Contributing
 
-This is a school project for Tallinna Polütehnikum. For issues and questions, please use the [GitHub Issues](https://github.com/Tallinna-Polütehnikum/TA23B-B5-projekt/issues) page.
+This is a school project for Tallinna Polütehnikum. For issues and questions, please use the [GitHub Issues](https://github.com/DLtru/cino/issues) page.
